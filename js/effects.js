@@ -21,9 +21,39 @@ class Effects{
       lose:['#8a8fa8','#4a4f66','#c7ccdd'],
       win:['#ffd86b','#7de3ff','#ff9ad5','#b48dff']
     };
+    this.toastLayer=document.createElement('div');
+    this.toastLayer.className='fx-toast-layer';
+    document.body.appendChild(this.toastLayer);
+    this.toastIcons={
+      lose:'⏳',
+      death:'💀',
+      start:'🏰',
+      win:'🏆',
+      info:'✨'
+    };
     this.startAmbient();
     this.startBoardAmbient();
     this.startPieceAura();
+  }
+  toast(type,title,message,duration=2600){
+    const t=document.createElement('div');
+    t.className=`fx-toast fx-toast-${type}`;
+    const icon=this.toastIcons[type]||'✨';
+    t.innerHTML=`<div class="fx-toast-icon">${icon}</div><div class="fx-toast-body"><strong>${title}</strong><span>${message}</span></div>`;
+    this.toastLayer.appendChild(t);
+    requestAnimationFrame(()=>t.classList.add('show'));
+    setTimeout(()=>{
+      t.classList.remove('show');
+      setTimeout(()=>t.remove(),500);
+    },duration);
+  }
+  screenShake(){
+    const frame=document.getElementById('boardFrame');
+    if(!frame)return;
+    frame.classList.remove('shake');
+    void frame.offsetWidth;
+    frame.classList.add('shake');
+    setTimeout(()=>frame.classList.remove('shake'),520);
   }
   spawn(x,y,{cls='fx-spark',text='✦',color='#ffd86b',size=13,dx=0,dy=-30,dur=900,layer=this.layer}={}){
     const s=document.createElement('span');

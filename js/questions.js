@@ -30,7 +30,7 @@ class QuestionManager{
           [...this.answers.children].forEach((b,idx)=>{b.disabled=true;if(options[idx].correct)b.classList.add('correct')});
           if(!ok)btn.classList.add('wrong');
           this.feedback.textContent=ok?'✅ Correcto. Sumas 1 punto.':'❌ Fallo. Pierdes el siguiente turno.';
-          if(window.magicFX)magicFX.burstAtElement(btn,ok?'dice':'death',10);
+          if(window.magicFX){magicFX.burstAtElement(btn,ok?'dice':'death',10);if(!ok){magicFX.toast('lose','Respuesta fallida',`${player.name} pierde el próximo turno.`);magicFX.screenShake()}}
           if(ok){player.score++}else{player.skipTurns++}
           this.game.updateScores();
           setTimeout(()=>{this.modal.classList.add('hidden');resolve(ok)},900);
