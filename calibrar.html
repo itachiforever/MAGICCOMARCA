@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<title>Calibrar casillas — MAGIC5V</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,Helvetica,sans-serif;background:#1b1315;color:#fff;display:flex;height:100vh;overflow:hidden}
+  #sidebar{width:300px;flex:none;background:#241a1d;padding:16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+  #sidebar h1{font-size:18px;color:#f0ce72}
+  #sidebar p{font-size:13px;line-height:1.5;color:#e9dde0}
+  .row{display:flex;gap:8px;align-items:center}
+  .row button{flex:1;padding:10px;border:0;border-radius:8px;background:#5f3431;color:#fff;font-weight:700;font-size:16px;cursor:pointer}
+  .row button:hover{background:#7a423f}
+  #cellNum{font-size:32px;font-weight:900;color:#fff;text-align:center;flex:1}
+  #zoomRow button{font-size:13px;padding:8px}
+  #status{font-size:13px;background:#000;padding:8px;border-radius:6px;min-height:36px}
+  #jumpUnset{width:100%;padding:10px;border:0;border-radius:8px;background:#3a2a2c;color:#f0ce72;font-weight:700;cursor:pointer}
+  #download{width:100%;padding:14px;border:0;border-radius:8px;background:linear-gradient(135deg,#f7df98,#bd832d);color:#211416;font-weight:900;cursor:pointer;font-size:15px}
+  #list{font-size:12px;line-height:1.6;max-height:220px;overflow-y:auto;background:#000;padding:8px;border-radius:6px}
+  #list span{display:inline-block;width:44px}
+  #list b{color:#f0ce72}
+  #viewport{flex:1;overflow:auto;position:relative;background:#0a0708}
+  #stage{position:relative;transform-origin:0 0}
+  #board{display:block;user-select:none;-webkit-user-drag:none}
+  .marker{position:absolute;width:26px;height:26px;margin-left:-13px;margin-top:-13px;border-radius:50%;background:rgba(232,71,84,.9);border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;cursor:grab;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+  .marker.done{background:rgba(45,191,157,.9)}
+  .marker.active{background:rgba(242,199,68,.95);color:#211416;width:34px;height:34px;margin-left:-17px;margin-top:-17px;font-size:14px;z-index:5}
+  .marker.unset{background:rgba(120,120,120,.5);border-style:dashed}
+</style>
+</head>
+<body>
+  <div id="sidebar">
+    <h1>Calibrar casillas</h1>
+    <p>Casilla actual — haz clic sobre el tablero (a la derecha) en el centro exacto de esa casilla, o arrastra el punto amarillo. Usa el zoom para afinar.</p>
+    <div class="row">
+      <button id="prevBtn">◀</button>
+      <div id="cellNum">1</div>
+      <button id="nextBtn">▶</button>
+    </div>
+    <div id="status">Casilla 1 de 50</div>
+    <div class="row" id="zoomRow">
+      <button data-z="1">100%</button>
+      <button data-z="2">200%</button>
+      <button data-z="3.5">350%</button>
+    </div>
+    <button id="download">⬇ Descargar data.js corregido</button>
+    <p style="color:#9c8b90">Sustituye <code>js/data.js</code> por el archivo descargado.</p>
+    <div id="list"></div>
+  </div>
+  <div id="viewport">
+    <div id="stage">
+      <img id="board" src="assets/board/tablero_original.png" />
+      <div id="markers"></div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script>
+    const IW = MAGIC5V_DATA.imageWidth, IH = MAGIC5V_DATA.imageHeight;
+    const cells = {};
+    for (let i=1;i<=50;i++){ cells[i] = MAGIC5V_DATA.cells[i] ? MAGIC5V_DATA.cells[i].slice() : null; }
+
+    const stage = document.getElementById('stage');
+    const board = document.getElementById('board');
+    const markersLayer = document.getElementById('markers');
+    const cellNumEl = document.getElementById('cellNum');
+    const statusEl = document.getElementById('status');
+    const listEl = document.getElementById('list');
+    let current = 1;
+    let scale = 1;
+
+    function applyScale(){
+      stage.style.transform = `scale(${scale})`;
+      stage.style.width = IW+'px';
+      stage.style.height = IH+'px';
+    }
+    board.onload = () => { applyScale(); renderMarkers(); };
+    if (board.complete) { applyScale(); renderMarkers(); }
+
+    document.querySelectorAll('#zoomRow button').forEach(b=>{
+      b.onclick = () => { scale = parseFloat(b.dataset.z); applyScale(); };
+    });
+
+    function renderMarkers(){
+      markersLayer.innerHTML='';
+      for (let i=1;i<=50;i++){
+        const d = document.createElement('div');
+        const has = !!cells[i];
+        d.className = 'marker' + (i===current?' active':(has?' done':' unset'));
+        d.textContent = i;
+        if (has){ d.style.left = cells[i][0]+'px'; d.style.top = cells[i][1]+'px'; }
+        else { d.style.left = (IW/2)+'px'; d.style.top = (IH/2)+'px'; d.style.display='none'; }
+        d.dataset.cell = i;
+        d.onmousedown = (e)=>{ e.stopPropagation(); current = i; startDrag(e); renderMarkers(); };
+        markersLayer.appendChild(d);
+      }
+      cellNumEl.textContent = current;
+      statusEl.textContent = `Casilla ${current} de 50` + (cells[current] ? ` — (${cells[current][0]}, ${cells[current][1]})` : ' — sin definir');
+      listEl.innerHTML = Array.from({length:50},(_,k)=>k+1).map(i=>{
+        const c = cells[i];
+        return `<span>${i}:</span> ${c ? `<b>${c[0]}, ${c[1]}</b>` : '—'}`;
+      }).join('<br>');
+    }
+
+    function setCellFromEvent(e){
+      const rect = stage.getBoundingClientRect();
+      const x = Math.round((e.clientX - rect.left) / scale);
+      const y = Math.round((e.clientY - rect.top) / scale);
+      cells[current] = [Math.max(0,Math.min(IW,x)), Math.max(0,Math.min(IH,y))];
+      renderMarkers();
+    }
+
+    stage.addEventListener('click', (e)=>{
+      if (draggingNow) return;
+      setCellFromEvent(e);
+    });
+
+    let draggingNow = false;
+    function startDrag(e){
+      draggingNow = true;
+      const move = (ev)=>{ setCellFromEvent(ev); };
+      const up = (ev)=>{
+        setCellFromEvent(ev);
+        window.removeEventListener('mousemove', move);
+        window.removeEventListener('mouseup', up);
+        setTimeout(()=>draggingNow=false, 0);
+      };
+      window.addEventListener('mousemove', move);
+      window.addEventListener('mouseup', up);
+    }
+
+    document.getElementById('prevBtn').onclick = ()=>{ current = current===1?50:current-1; renderMarkers(); };
+    document.getElementById('nextBtn').onclick = ()=>{ current = current===50?1:current+1; renderMarkers(); };
+    window.addEventListener('keydown', (e)=>{
+      if (e.key==='ArrowRight'){ current = current===50?1:current+1; renderMarkers(); }
+      if (e.key==='ArrowLeft'){ current = current===1?50:current-1; renderMarkers(); }
+    });
+
+    document.getElementById('download').onclick = ()=>{
+      const missing = Array.from({length:50},(_,k)=>k+1).filter(i=>!cells[i]);
+      if (missing.length){ if(!confirm(`Faltan casillas sin definir: ${missing.join(', ')}. ¿Descargar igualmente?`)) return; }
+      let cellsBlock = Array.from({length:50},(_,k)=>k+1)
+        .filter(i=>cells[i])
+        .map(i=>`    ${i}:[${cells[i][0]},${cells[i][1]}]`)
+        .join(',\n');
+      const rulesBlock = JSON.stringify(MAGIC5V_DATA.rules, null, 2).replace(/"([a-zA-Z]+)":/g,'$1:');
+      const questionsBlock = JSON.stringify(MAGIC5V_DATA.questions, null, 2);
+      const out = `const MAGIC5V_DATA = {\n  imageWidth: ${IW},\n  imageHeight: ${IH},\n  cells: {\n${cellsBlock}\n  },\n  rules: ${rulesBlock},\n  questions: ${questionsBlock}\n};\n`;
+      const blob = new Blob([out], {type:'text/javascript'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'data.js';
+      a.click();
+    };
+
+    renderMarkers();
+  </script>
+</body>
+</html>
