@@ -714,3 +714,157 @@ button {
     transform: translateY(0) scale(1) rotate(0deg);
   }
 }
+
+/* ======================================================
+   TABLERO 3D
+====================================================== */
+.board-3d {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  position: relative;
+  cursor: grab;
+}
+.board-3d:active {
+  cursor: grabbing;
+}
+.board-3d canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 10px;
+}
+.board-3d.shake {
+  animation: boardShake 0.52s ease-in-out;
+}
+@keyframes boardShake {
+  0%, 100% { transform: translate(0, 0); }
+  15% { transform: translate(-5px, 3px); }
+  30% { transform: translate(5px, -3px); }
+  45% { transform: translate(-4px, -2px); }
+  60% { transform: translate(4px, 2px); }
+  75% { transform: translate(-2px, 1px); }
+}
+
+/* ======================================================
+   SELECCIÓN DE CRIATURAS
+====================================================== */
+.creature-picker-box {
+  width: min(680px, 94vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  text-align: center;
+}
+
+.creature-stage {
+  width: 280px;
+  height: 280px;
+  margin: 16px auto 8px;
+  border-radius: 20px;
+  background: radial-gradient(circle at 50% 40%, rgba(60, 40, 50, 0.6), rgba(20, 12, 16, 0.9));
+  border: 1px solid rgba(239, 197, 101, 0.3);
+  overflow: hidden;
+  position: relative;
+}
+.creature-stage canvas {
+  display: block;
+}
+
+.creature-name {
+  font-size: 28px;
+  font-weight: 900;
+  color: #f3d77d;
+  margin-top: 4px;
+}
+
+.creature-desc {
+  font-size: 16px;
+  color: #e9dde0;
+  margin: 6px auto 16px;
+  max-width: 420px;
+  line-height: 1.4;
+}
+
+.creature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  max-width: 440px;
+  margin: 0 auto 16px;
+}
+
+.creature-thumb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border-radius: 14px;
+  background: #5b363a;
+  border: 2px solid transparent;
+  color: #fff;
+  transition: 0.2s;
+}
+.creature-thumb:hover {
+  transform: translateY(-2px);
+  background: #6e4347;
+}
+.creature-thumb.selected {
+  border-color: #f3d77d;
+  background: #7a4a4e;
+  box-shadow: 0 0 16px rgba(243, 215, 125, 0.4);
+}
+
+.creature-thumb-emoji {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.creature-thumb-name {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.creature-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.picker-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #4a3030;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: 0.2s;
+}
+.picker-dot.active {
+  background: #f3d77d;
+  box-shadow: 0 0 8px rgba(243, 215, 125, 0.6);
+}
+.picker-dot.done {
+  background: #2dbf9d;
+}
+
+.creature-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.creature-actions .secondary-btn,
+.creature-actions .primary-btn {
+  margin-top: 0;
+  min-width: 130px;
+}
+
+@media (max-width: 600px) {
+  .creature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .creature-stage {
+    width: 240px;
+    height: 240px;
+  }
+}

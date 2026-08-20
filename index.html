@@ -34,11 +34,8 @@
     <section id="gameScreen" class="screen">
       <main class="game-layout">
         <div class="board-panel">
-          <div id="boardFrame" class="board-frame">
-            <img id="boardImage" src="assets/board/tablero_original.png" alt="Tablero original Los Cuentos de las Cinco Villas" />
-            <div id="piecesLayer" class="pieces-layer"></div>
-            <div id="labelsLayer" class="labels-layer hidden"></div>
-          </div>
+          <div id="board3d" class="board-3d"></div>
+          <div id="labelsLayer" class="labels-layer hidden"></div>
         </div>
 
         <aside class="side-panel">
@@ -64,6 +61,7 @@
           </div>
 
           <div class="info-card controls-card">
+            <button id="toggleLabelsBtn" class="secondary-btn">Ver nº casillas</button>
             <button id="restartBtn" class="secondary-btn danger">Reiniciar partida</button>
           </div>
 
@@ -79,6 +77,23 @@
         </aside>
       </main>
     </section>
+
+    <div id="creatureModal" class="modal hidden">
+      <div class="modal-box creature-picker-box">
+        <div class="modal-kicker">Elige tu criatura</div>
+        <h2 id="creaturePickerTitle">Jugador 1 de 1</h2>
+        <p id="creaturePickerSubtitle">Elige tu criatura fantástica para la aventura.</p>
+        <div id="creatureStage" class="creature-stage"></div>
+        <div id="creatureName" class="creature-name"></div>
+        <div id="creatureDesc" class="creature-desc"></div>
+        <div id="creatureGrid" class="creature-grid"></div>
+        <div id="creatureDots" class="creature-dots"></div>
+        <div class="creature-actions">
+          <button id="creatureBackBtn" class="secondary-btn">Atrás</button>
+          <button id="creatureConfirmBtn" class="primary-btn">Confirmar</button>
+        </div>
+      </div>
+    </div>
 
     <div id="questionModal" class="modal hidden">
       <div class="modal-box question-box">
@@ -110,7 +125,11 @@
     </div>
   </div>
 
+  <script src="js/lib/three.min.js"></script>
   <script src="js/data.js"></script>
+  <script src="js/creatures.js"></script>
+  <script src="js/scene3d.js"></script>
+  <script src="js/creaturePicker.js"></script>
   <script src="js/player.js"></script>
   <script src="js/board.js"></script>
   <script src="js/effects.js"></script>
