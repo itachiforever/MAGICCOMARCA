@@ -7,12 +7,25 @@ class QuestionManager{
     this.answers=document.getElementById('answerList');
     this.feedback=document.getElementById('questionFeedback');
   }
-  get(cell){return MAGIC5V_DATA.questions.find(q=>q.cell===cell)||null}
+
+  get(cell){
+    return MAGIC5V_DATA.questions.find(q=>q.cell===cell)||null;
+  }
+
   shuffled(question){
-    const items=question.answers.map((text,index)=>({text,correct:index===question.correct}));
-    for(let i=items.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[items[i],items[j]]=[items[j],items[i]]}
+    const items=question.answers.map((text,index)=>({
+      text,
+      correct:index===question.correct
+    }));
+
+    for(let i=items.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [items[i],items[j]]=[items[j],items[i]];
+    }
+
     return items;
   }
+
   async ask(player,question){
     return new Promise(resolve=>{
       this.title.textContent=question.title;
@@ -20,21 +33,54 @@ class QuestionManager{
       this.answers.innerHTML='';
       this.feedback.textContent='';
       this.modal.classList.remove('hidden');
+
       const options=this.shuffled(question);
+
       options.forEach(option=>{
         const btn=document.createElement('button');
         btn.className='answer-btn';
         btn.textContent=option.text;
-        btn.onclick=()=>{
+
+        btn.onclick=async()=>{
           const ok=option.correct;
-          [...this.answers.children].forEach((b,idx)=>{b.disabled=true;if(options[idx].correct)b.classList.add('correct')});
+
+          [...this.answers.children].forEach((button,index)=>{
+            button.disabled=true;
+            if(options[index].correct)button.classList.add('correct');
+          });
+
           if(!ok)btn.classList.add('wrong');
-          this.feedback.textContent=ok?'✅ Correcto. Sumas 1 punto.':'❌ Fallo. Pierdes el siguiente turno.';
-          if(window.magicFX){magicFX.burstAtElement(btn,ok?'dice':'death',10);if(!ok){magicFX.toast('lose','Respuesta fallida',`${player.name} pierde el próximo turno.`);magicFX.screenShake()}}
-          if(ok){player.score++}else{player.skipTurns++}
+
+          if(window.magicFX){
+            magicFX.burstAtElement(btn,ok?'dice':'death',10);
+          }
+
+          if(ok){
+            player.score++;
+            this.feedback.textContent='✅ ¡Correcto! Sumas 1 punto.';
+            this.game.updateScores();
+            await this.game.wait(900);
+            this.modal.classList.add('hidden');
+            resolve(true);
+            return;
+          }
+
+          player.skipTurns++;
+          this.feedback.textContent='❌ Respuesta incorrecta.';
           this.game.updateScores();
-          setTimeout(()=>{this.modal.classList.add('hidden');resolve(ok)},900);
+
+          await this.game.wait(650);
+          this.modal.classList.add('hidden');
+
+          await this.game.showLoseTurn({
+            icon:'🕳️',
+            title:'¡Al pozo!',
+            text:`${player.name} ha fallado la pregunta y cae al pozo. Pierde su próximo turno.`
+          });
+
+          resolve(false);
         };
+
         this.answers.appendChild(btn);
       });
     });

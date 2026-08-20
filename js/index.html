@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MAGIC5V | Los Cuentos de las Cinco Villas</title>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <div id="app">
+    <section id="startScreen" class="screen active">
+      <div class="hero">
+        <div class="hero-badge">✦ COMARCA DIVERTIDA ✦</div>
+        <h1>MAGIC5V</h1>
+        <h2>Los Cuentos de las Cinco Villas</h2>
+        <p>Recorre el tablero original, supera retos y recupera la magia de la comarca.</p>
+        <button id="startBtn" class="primary-btn">Comenzar aventura ✨</button>
+      </div>
+    </section>
+
+    <section id="setupScreen" class="screen">
+      <div class="setup-card">
+        <h2>Elige jugadores</h2>
+        <p>Selecciona de 1 a 4 jugadores.</p>
+        <div class="player-select">
+          <button data-players="1">1</button>
+          <button data-players="2">2</button>
+          <button data-players="3">3</button>
+          <button data-players="4">4</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen">
+      <main class="game-layout">
+        <div class="board-panel">
+          <div id="boardFrame" class="board-frame">
+            <img id="boardImage" src="assets/board/tablero_original.png" alt="Tablero original Los Cuentos de las Cinco Villas" />
+            <div id="piecesLayer" class="pieces-layer"></div>
+            <div id="labelsLayer" class="labels-layer hidden"></div>
+          </div>
+        </div>
+
+        <aside class="side-panel">
+          <div class="info-card current-turn">
+            <div class="turn-head">
+              <h3>Turno</h3>
+              <button id="muteBtn" class="icon-btn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
+            </div>
+            <strong id="turnText">Jugador 1</strong>
+          </div>
+
+          <div class="info-card dice-card">
+            <h3>Dado</h3>
+            <button id="rollBtn" class="dice-btn" aria-label="Tirar dado"><span id="diceFace">🎲</span></button>
+            <div id="diceValue">-</div>
+          </div>
+
+          <div class="info-card">
+            <h3>Estado</h3>
+            <div id="statusText">Partida preparada.</div>
+          </div>
+
+          <div class="info-card score-card">
+            <h3>Puntuación</h3>
+            <div id="scoreList"></div>
+          </div>
+
+          <div class="info-card log-card">
+            <h3>Comprobación</h3>
+            <div id="gameLog"></div>
+            <button id="toggleLabelsBtn" class="secondary-btn">Ver nº casillas</button>
+            <button id="restartBtn" class="secondary-btn danger">Reiniciar</button>
+          </div>
+
+          <div class="info-card rules-card">
+            <h3>Reglas activas</h3>
+            <p><b>Logo:</b> salta al siguiente logo y vuelve a tirar.</p>
+            <p><b>Dados:</b> 16/26 cambian entre sí y vuelve a tirar.</p>
+            <p><b>Colores:</b> 6↔12, 18↔24, 21↔29.</p>
+            <p><b>Negras:</b> 19,30,35,40 pierden turno. 44 vuelve a salida.</p>
+            <p><b>Muerte:</b> 47 vuelve directo a casilla 1.</p>
+            <p><b>Meta:</b> hay que llegar con número exacto.</p>
+          </div>
+        </aside>
+      </main>
+    </section>
+
+    <div id="questionModal" class="modal hidden">
+      <div class="modal-box question-box">
+        <div class="modal-kicker">Reto de las Cinco Villas</div>
+        <h2 id="questionTitle"></h2>
+        <p id="questionText"></p>
+        <div id="answerList" class="answer-list"></div>
+        <div id="questionFeedback" class="question-feedback"></div>
+      </div>
+    </div>
+
+    <div id="winModal" class="modal hidden">
+      <div class="modal-box win-box">
+        <div class="magic-burst">✨</div>
+        <h2>¡Aventura completada!</h2>
+        <p id="winText"></p>
+        <button id="winRestartBtn" class="primary-btn">Jugar otra vez</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/fx.js"></script>
+  <script src="js/sfx.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/questions.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
