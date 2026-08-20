@@ -236,3 +236,5 @@ class Effects {
     }, 420);
   }
 }
+
+window.Effects = Effects;

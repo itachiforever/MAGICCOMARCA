@@ -44,16 +44,24 @@ class Game {
     this.show('gameScreen');
 
     setTimeout(() => {
-      if (!this.scene3d) {
-        const container = document.getElementById('board3d');
-        this.scene3d = new window.Scene3D(container, MAGIC5V_DATA);
-        this.board = new Board(this.scene3d);
-        this.questions = new QuestionManager(this);
+      try {
+        if (!this.scene3d) {
+          const container = document.getElementById('board3d');
+          this.scene3d = new window.Scene3D(container, MAGIC5V_DATA);
+          this.board = new Board(this.scene3d);
+          this.questions = new QuestionManager(this);
+          if (window.Effects && !window.magicFX) {
+            window.magicFX = new window.Effects(this.board);
+          }
+        }
+        this.players.forEach((p) => this.board.place(p, true));
+        this.updateUI();
+        this.updateScores();
+        this.log('Partida iniciada. Todos empiezan en casilla 1.');
+      } catch (err) {
+        console.error('[MAGIC5V] Error starting game:', err);
+        this.setStatus('Error al iniciar. Revisa la consola.');
       }
-      this.players.forEach((p) => this.board.place(p, true));
-      this.updateUI();
-      this.updateScores();
-      this.log('Partida iniciada. Todos empiezan en casilla 1.');
     }, 150);
   }
 
