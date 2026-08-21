@@ -204,6 +204,18 @@ class Effects {
       if (document.hidden) return;
       const player = window.magic5v && window.magic5v.players[window.magic5v.current];
       if (!player || !player.object3D) return;
+      if (this.board.fallback) {
+        const r = player.object3D.getBoundingClientRect();
+        this.spawn(r.left + r.width / 2 + (Math.random() * 20 - 10), r.top + r.height / 2 + (Math.random() * 16 - 4), {
+          text: Math.random() < 0.5 ? '✧' : '·',
+          color: '#ffe9a8',
+          size: 8 + Math.random() * 6,
+          dx: Math.random() * 14 - 7,
+          dy: -(12 + Math.random() * 16),
+          dur: 700 + Math.random() * 400,
+        });
+        return;
+      }
       const pos = player.object3D.position;
       const sp = window.magic5v.scene3d.worldToScreen(new THREE.Vector3(pos.x, pos.y + 0.6, pos.z));
       this.spawn(sp.x + (Math.random() * 20 - 10), sp.y + (Math.random() * 16 - 4), {

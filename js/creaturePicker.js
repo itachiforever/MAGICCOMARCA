@@ -24,7 +24,13 @@ class CreaturePicker {
   }
 
   setupMiniScene() {
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    try {
+      this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch (e) {
+      this.renderer = null;
+      this.showFallbackStage();
+      return;
+    }
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.setSize(280, 280);
@@ -71,6 +77,12 @@ class CreaturePicker {
     this.renderer.setAnimationLoop(() => this.render());
   }
 
+  showFallbackStage() {
+    this.fallbackEmoji = document.createElement('div');
+    this.fallbackEmoji.className = 'creature-fallback';
+    this.stage.appendChild(this.fallbackEmoji);
+  }
+
   buildGrid() {
     this.gridEl.innerHTML = '';
     this.creatures.forEach((c) => {
@@ -101,6 +113,20 @@ class CreaturePicker {
   }
 
   showCreature(id) {
+    const c = this.creatures.find((x) => x.id === id);
+    this.nameEl.textContent = c.name;
+    this.descEl.textContent = this.description(id);
+    this.currentCreatureId = id;
+
+    [...this.gridEl.children].forEach((b) => {
+      b.classList.toggle('selected', b.dataset.id === id);
+    });
+
+    if (!this.renderer) {
+      this.fallbackEmoji.textContent = c.emoji;
+      return;
+    }
+
     if (this.currentCreature) {
       this.scene.remove(this.currentCreature);
       this.currentCreature.traverse((c) => {
@@ -113,15 +139,6 @@ class CreaturePicker {
     });
     this.currentCreature.scale.setScalar(0.85);
     this.scene.add(this.currentCreature);
-
-    const c = this.creatures.find((x) => x.id === id);
-    this.nameEl.textContent = c.name;
-    this.descEl.textContent = this.description(id);
-    this.currentCreatureId = id;
-
-    [...this.gridEl.children].forEach((b) => {
-      b.classList.toggle('selected', b.dataset.id === id);
-    });
   }
 
   description(id) {
@@ -179,6 +196,7 @@ class CreaturePicker {
   }
 
   render() {
+    if (!this.renderer) return;
     const t = this.clock.getElapsedTime();
     if (this.currentCreature && this.currentCreature.userData.update) {
       this.currentCreature.userData.update(t);

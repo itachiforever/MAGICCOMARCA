@@ -262,9 +262,13 @@ class Game {
     const chip = creature ? `${creature.emoji} ` : '';
     document.getElementById('turnText').innerHTML = `<span class="turn-chip p${player.id}"></span>${chip}${player.name}`;
     this.players.forEach((p) => {
-      if (p.object3D) p.object3D.userData.active = false;
+      if (p.object3D && p.object3D.userData) p.object3D.userData.active = false;
+      if (p.object3D && p.object3D.classList) p.object3D.classList.remove('active');
     });
-    if (player.object3D) player.object3D.userData.active = true;
+    if (player.object3D) {
+      if (player.object3D.userData) player.object3D.userData.active = true;
+      if (player.object3D.classList) player.object3D.classList.add('active');
+    }
     this.setStatus(`Turno de ${player.name}.`);
     this.updateScores();
   }

@@ -916,3 +916,44 @@ button {
   color: #e9dde0;
   font-size: 13px;
 }
+
+/* ======================================================
+   FALLBACK (no WebGL)
+====================================================== */
+.creature-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 120px;
+  line-height: 1;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.5));
+  animation: creatureBob 2s ease-in-out infinite alternate;
+}
+@keyframes creatureBob {
+  from { transform: translateY(0) scale(1); }
+  to { transform: translateY(-8px) scale(1.05); }
+}
+.board-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  text-align: center;
+  padding: 24px;
+}
+.board-fallback img {
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: 12px;
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.45);
+}
+.board-fallback p {
+  color: #e9dde0;
+  font-size: 15px;
+}

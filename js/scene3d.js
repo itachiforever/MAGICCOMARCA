@@ -4,8 +4,15 @@ class Scene3D {
     this.data = data;
     this.pieces = [];
     this.clock = new THREE.Clock();
+    this.fallback = false;
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    try {
+      this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch (e) {
+      this.initFallback();
+      return;
+    }
+
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -33,6 +40,33 @@ class Scene3D {
 
     this.renderer.setAnimationLoop(() => this.render());
     this.startAutoRotate();
+  }
+
+  initFallback() {
+    this.fallback = true;
+    this.boardWidth = 4.2;
+    this.boardHeight = this.boardWidth / (this.data.imageWidth / this.data.imageHeight);
+    this.boardHalfW = this.boardWidth / 2;
+    this.boardHalfH = this.boardHeight / 2;
+
+    this.container.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'board-fallback';
+
+    const img = document.createElement('img');
+    img.src = 'assets/board/tablero_original.png';
+    img.alt = 'Tablero';
+    wrap.appendChild(img);
+
+    const note = document.createElement('p');
+    note.textContent = 'Modo simplificado (sin WebGL). Las criaturas se muestran con emojis.';
+    wrap.appendChild(note);
+
+    this.piecesLayer = document.createElement('div');
+    this.piecesLayer.className = 'pieces-layer';
+    wrap.appendChild(this.piecesLayer);
+
+    this.container.appendChild(wrap);
   }
 
   setupLights() {
@@ -130,6 +164,13 @@ class Scene3D {
     return new THREE.Vector3(nx, 0.18, nz);
   }
 
+  cellToScreen(cell) {
+    const [x, y] = this.data.cells[cell];
+    const px = (x / this.data.imageWidth) * 100;
+    const py = (y / this.data.imageHeight) * 100;
+    return { x: px, y: py };
+  }
+
   worldToScreen(vec3) {
     const v = vec3.clone();
     v.project(this.camera);
@@ -141,6 +182,9 @@ class Scene3D {
   }
 
   addPiece(creature, cell, playerId) {
+    if (this.fallback) {
+      return this.addFallbackPiece(creature, cell, playerId);
+    }
     const obj = (typeof creature === 'string')
       ? window.CreatureFactory.build(creature)
       : creature;
@@ -158,7 +202,33 @@ class Scene3D {
     return obj;
   }
 
+  addFallbackPiece(creature, cell, playerId) {
+    const id = typeof creature === 'string' ? creature : 'dragon';
+    const c = window.CreatureFactory.list().find((x) => x.id === id) || window.CreatureFactory.list()[0];
+    const el = document.createElement('div');
+    el.className = `piece p${playerId}`;
+    el.textContent = c.emoji;
+    el.style.fontSize = '20px';
+    el.style.display = 'flex';
+    el.style.alignItems = 'center';
+    el.style.justifyContent = 'center';
+    const p = this.cellToScreen(cell);
+    el.style.left = `${p.x}%`;
+    el.style.top = `${p.y}%`;
+    el.userData = { playerId, cell };
+    this.piecesLayer.appendChild(el);
+    this.pieces.push(el);
+    return el;
+  }
+
   movePieceTo(piece, cell, instant = false) {
+    if (this.fallback) {
+      const p = this.cellToScreen(cell);
+      piece.style.left = `${p.x}%`;
+      piece.style.top = `${p.y}%`;
+      piece.userData.cell = cell;
+      return;
+    }
     const pos = this.cellToWorld(cell);
     piece.userData.basePos = pos.clone();
     if (instant) {
@@ -168,10 +238,12 @@ class Scene3D {
   }
 
   setPieceOffset(piece, offsetVec) {
+    if (this.fallback) return;
     piece.userData.offset = offsetVec.clone();
   }
 
   render() {
+    if (this.fallback) return;
     const t = this.clock.getElapsedTime();
     for (const p of this.pieces) {
       if (p.userData.update) p.userData.update(t);
@@ -191,6 +263,7 @@ class Scene3D {
   }
 
   onResize() {
+    if (this.fallback) return;
     const w = this.container.clientWidth;
     const h = this.container.clientHeight;
     this.renderer.setSize(w, h);
